@@ -1,11 +1,13 @@
 package tienda.tiendaonlinev2.modelo.entidad;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.annotation.Repeatable;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -31,6 +33,7 @@ public class Producto {
 
     @NotNull
     @Column(name = "precio", nullable = false, precision = 10, scale = 2)
+    @DecimalMin(value = "0.0", inclusive = true,message = "El precio no puede ser negativo")
     private BigDecimal precio;
 
     @NotNull

@@ -8,6 +8,7 @@ import tienda.tiendaonlinev2.modelo.entidad.Historial;
 import tienda.tiendaonlinev2.modelo.entidad.Producto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface historialRepo extends CrudRepository <Historial, Integer> {
 
@@ -18,4 +19,6 @@ public interface historialRepo extends CrudRepository <Historial, Integer> {
     List<Historial> getHistorialsByProducto(@NotNull Producto producto);
 
     Historial getHistorialById(int id);
+
+    Optional<Historial> getHistorialByClienteAndProductoAndTipoLikeAndDescripcionIsNull(@NotNull Cliente cliente, @NotNull Producto producto, @Size(max = 100) @NotNull String tipo, @Size(max = 200) String descripcion);
 }

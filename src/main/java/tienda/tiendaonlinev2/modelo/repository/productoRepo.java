@@ -11,4 +11,6 @@ public interface productoRepo extends CrudRepository <Producto, Integer>{
     Producto getProductoById(Integer id);
 
     List<Producto> getProductosByNombre(@Size(max = 100) @NotNull String nombre);
+
+    Producto getProductoByNombre(String nombre);
 }

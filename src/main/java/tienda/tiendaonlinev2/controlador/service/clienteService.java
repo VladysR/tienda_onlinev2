@@ -6,6 +6,7 @@ import tienda.tiendaonlinev2.modelo.entidad.Cliente;
 import tienda.tiendaonlinev2.modelo.repository.clienteRepo;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class clienteService {
@@ -21,21 +22,27 @@ public class clienteService {
         return (List<Cliente>)
                 repo.findAll();
     }
-    public Cliente getCliente(int id){
-        return repo.getClienteById(id);
+    public Optional<Cliente> getCliente(int id){
+        return Optional.ofNullable(repo.getClienteById(id));
     }
-    public Cliente getClienteByNickname(String nickname){
-        return repo.getClienteByNickname(nickname);
+    public Optional<Cliente> getClienteByNickname(String nickname){
+        return Optional.ofNullable(repo.getClienteByNickname(nickname));
     }
 
-    public Cliente addCliente(Cliente cliente){
-        return repo.save(cliente);
+    public Optional<Cliente> addCliente(Cliente cliente){
+        return Optional.of(repo.save(cliente));
     }
-    public Cliente updateCliente(Cliente cliente){
-        return repo.save(cliente);
+    public Optional<Cliente> updateCliente(Cliente cliente){
+        return Optional.of(repo.save(cliente));
     }
-    public void deleteCliente(int id){
+    public Boolean deleteCliente(int id){
         repo.deleteById(id);
+        return !repo.existsById(id);
     }
+
+    public Optional<Cliente> loginCliente(String nickname, String password){
+        return Optional.of(repo.getClienteByNicknameAndPassword(nickname, password));
+    }
+
 
 }
