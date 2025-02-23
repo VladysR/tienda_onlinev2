@@ -18,87 +18,92 @@ import java.util.Optional;
 @Service
 public class historialService {
     private historialRepo repo;
-    private productoService stockService;
+    private productoService productoService;
     private clienteService clienteService;
-    private tienda.tiendaonlinev2.modelo.repository.productoRepo productoRepo;
 
-    public historialService() {}
-    @Autowired
-    public historialService(historialRepo repo, productoService stockService, clienteService clienteService, productoRepo productoRepo) {
-        this.repo = repo;
-        this.stockService = stockService;
-        this.clienteService = clienteService;
-        this.productoRepo = productoRepo;
+    public historialService() {
     }
 
-    public List<Historial> getAllHistorial(){
+    @Autowired
+    public historialService(historialRepo repo, clienteService clienteService, productoService productoService) {
+        this.repo = repo;
+        this.clienteService = clienteService;
+        this.productoService = productoService;
+    }
+
+    public List<Historial> getAllHistorial() {
         return (List<Historial>) repo.findAll();
     }
-    public Historial getHistorialById(int id){
-        return repo.getHistorialById(id);
-    }
-    public List<Historial> getHistorialByCliente(Cliente cliente){
-        return repo.getHistorialsByCliente(cliente);
+
+    public Optional<Historial> getHistorialById(int id) {
+        return Optional.ofNullable(repo.getHistorialById(id));
     }
 
-    public List<Historial> getHistorialByProducto(Producto producto){
-        return repo.getHistorialsByProducto(producto);
+    public Optional<List<Historial>> getHistorialByCliente(int id) {
+        Cliente cliente = clienteService.getCliente(id).get();
+        return Optional.ofNullable(repo.getHistorialsByCliente(cliente));
     }
-    public List<Historial> getHistorialByTipo(String tipo){
-        return repo.getHistorialsByTipo(tipo);
+
+    public Optional<List<Historial>> getHistorialByProducto(int productoid) {
+        Producto producto = productoService.getProducto(productoid).get();
+        return Optional.ofNullable(repo.getHistorialsByProducto(producto));
     }
-    public Historial addHistorial(Historial historial){
-        stockService.removeStock(historial.getProducto(),historial.getCantidad());
-        return repo.save(historial);
+
+    public Optional<List<Historial>> getHistorialByTipo(String tipo) {
+        return Optional.ofNullable(repo.getHistorialsByTipo(tipo));
     }
-    public Historial updateHistorial(Historial historial){
-        return repo.save(historial);
+
+    public Optional<Historial> addHistorial(Historial historial) {
+        productoService.removeStock(historial.getProducto().getId(), historial.getCantidad());
+        return Optional.of(repo.save(historial));
     }
-    public void deleteHistorial(int id){
+
+    public Optional<Historial> updateHistorial(Historial historial) {
+        return Optional.of(repo.save(historial));
+    }
+
+    public void deleteHistorial(int id) {
         Historial historial = repo.getHistorialById(id);
-        stockService.addStock(historial.getProducto(),historial.getCantidad());
+        productoService.addStock(historial.getProducto().getId(), historial.getCantidad());
         repo.deleteById(id);
     }
 
 
-    public Historial Compra (String nickname,DTOProducto dtoProducto){
+    public Optional<Historial> Compra(String nickname, DTOProducto dtoProducto) {
         Optional<Cliente> cliente = clienteService.getClienteByNickname(nickname);
-        if(cliente.isPresent()){
-        Optional<Producto> producto = stockService.getProductoByNombre(dtoProducto.getNombre());
-        if(producto.isPresent()){
-            Historial historial = new Historial();
-            historial.setProducto(producto.get());
-            historial.setCantidad(dtoProducto.getCantidad());
-            historial.setCliente(cliente.get());
-            historial.setTipo("Compra");
-            historial.setFechaCompra(LocalDate.now());
-            return addHistorial(historial);
-        }else return null;
-        }else return null;
+        Cliente clienteEncontrado = cliente.orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        Optional<Producto> producto = productoService.getProductoByNombre(dtoProducto.getNombre());
+        Producto productoEncontrado = producto.orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        Historial historial = new Historial();
+        historial.setProducto(producto.get());
+        historial.setCantidad(dtoProducto.getCantidad());
+        historial.setCliente(cliente.get());
+        historial.setTipo("Compra");
+        historial.setFechaCompra(LocalDate.now());
+        return addHistorial(historial);
+
 
     }
 
 
-    public Historial Devolucion (String nickname, DTOProducto dtoproducto,String descripcion) {
+    public Optional<Historial> Devolucion(String nickname, DTOProducto dtoproducto, String descripcion) {
 
         Optional<Cliente> cliente = clienteService.getClienteByNickname(nickname);
-        Optional<Producto> producto = stockService.getProductoByNombre(dtoproducto.getNombre()); //Saco entidades
+        Optional<Producto> producto = productoService.getProductoByNombre(dtoproducto.getNombre()); //Saco entidades
 
-        if (cliente.isPresent() && producto.isPresent()) {
+        Cliente clienteEncontrado = cliente.orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        Producto productoEncontrado = producto.orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        Optional<Historial> historial = repo.getHistorialByClienteAndProductoAndTipoLikeAndDescripcionIsNull(cliente.get(),producto.get(),"Compra",""); //Busco si existe el historial y busco su entidad
+        Optional<Historial> historial = repo.getHistorialByClienteAndProductoAndTipoLikeAndDescripcionIsNull(cliente.get(), producto.get(), "Compra"); //Busco si existe el historial y busco su entidad
 
-        if (historial.isPresent()) {
-                if (LocalDate.now().getYear() == historial.get().getFechaCompra().getYear() && LocalDate.now().getDayOfYear() - historial.get().getFechaCompra().getDayOfYear() <= 30) { //Compruebo la garantia de 30 dias
+        Historial historialEncontrado = historial.orElseThrow(() -> new RuntimeException("Historial no encontrado"));
+        if (LocalDate.now().getYear() == historial.get().getFechaCompra().getYear() && LocalDate.now().getDayOfYear() - historial.get().getFechaCompra().getDayOfYear() <= 30) { //Compruebo la garantia de 30 dias
 
-                historial.get().setTipo("Devolucion");
-                historial.get().setDescripcion(descripcion);
+            historial.get().setTipo("Devolucion");
+            historial.get().setDescripcion(descripcion);
 
-            return repo.save(historial.get());
-                }else return null;
-            }else return null;
-        }else return null;
-
+            return Optional.of(repo.save(historial.get()));
+        }
+        else return Optional.empty();
     }
-
 }

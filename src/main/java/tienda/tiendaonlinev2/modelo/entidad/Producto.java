@@ -1,11 +1,11 @@
 package tienda.tiendaonlinev2.modelo.entidad;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.lang.annotation.Repeatable;
 import java.math.BigDecimal;
@@ -24,6 +24,7 @@ public class Producto {
 
     @Size(max = 100)
     @NotNull
+    @NotEmpty(message = "El nombre no puede estar vacio")
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
@@ -38,9 +39,11 @@ public class Producto {
 
     @NotNull
     @Column(name = "stock", nullable = false)
+    @Min(value = 0,message = "El stock no puede ser negativo")
     private Integer stock;
 
     @OneToMany(mappedBy = "producto")
+    @JsonManagedReference("producto-historial")
     private Set<Historial> historials = new LinkedHashSet<>();
 
 }

@@ -20,5 +20,5 @@ public interface historialRepo extends CrudRepository <Historial, Integer> {
 
     Historial getHistorialById(int id);
 
-    Optional<Historial> getHistorialByClienteAndProductoAndTipoLikeAndDescripcionIsNull(@NotNull Cliente cliente, @NotNull Producto producto, @Size(max = 100) @NotNull String tipo, @Size(max = 200) String descripcion);
+    Optional<Historial> getHistorialByClienteAndProductoAndTipoLikeAndDescripcionIsNull(@NotNull Cliente cliente, @NotNull Producto producto, @Size(max = 100) @NotNull String tipo);
 }

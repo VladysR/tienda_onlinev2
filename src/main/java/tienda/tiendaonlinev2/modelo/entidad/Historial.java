@@ -1,5 +1,6 @@
 package tienda.tiendaonlinev2.modelo.entidad;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -25,12 +26,14 @@ public class Historial {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "cliente_id", nullable = false)
+    @JsonBackReference("cliente-historial")
     private Cliente cliente;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "producto_id", nullable = false)
+    @JsonBackReference("producto-historial")
     private Producto producto;
 
     @NotNull

@@ -17,6 +17,7 @@ public class clienteService {
     public clienteService(clienteRepo repo) {
         this.repo = repo;
     }
+    //CRUD BASICO
 
     public List<Cliente> getClientes(){
         return (List<Cliente>)
@@ -40,8 +41,10 @@ public class clienteService {
         return !repo.existsById(id);
     }
 
+
+    //LOGIN CON DTO
     public Optional<Cliente> loginCliente(String nickname, String password){
-        return Optional.of(repo.getClienteByNicknameAndPassword(nickname, password));
+        return Optional.ofNullable(repo.getClienteByNicknameAndPassword(nickname, password));
     }
 
 
